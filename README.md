@@ -6,9 +6,11 @@ A Chrome extension that uses Claude AI to summarize Drupal.org issue pages. Drup
 ![Manifest V3](https://img.shields.io/badge/Manifest-V3-34A853)
 ![Claude AI](https://img.shields.io/badge/Powered%20by-Claude%20AI-CC785C)
 
+![Screenshot of Drupal Issue Summarizer in action](screenshot.png)
+
 ## Features
 
-- **Automatic summarization** — panel appears on any Drupal.org issue page
+- **One-click summarization** — click Analyze on any Drupal.org issue page
 - **Structured output** — TL;DR, current status, key discussion points, action items, and notable context
 - **Caching** — summaries are cached locally for instant re-display
 - **Re-analyze** — one-click refresh when an issue gets new activity

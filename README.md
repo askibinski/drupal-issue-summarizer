@@ -32,10 +32,10 @@ A Chrome extension that uses Claude AI to summarize Drupal.org issue pages. Drup
 ## Usage
 
 1. Navigate to any Drupal.org issue page (e.g., `https://www.drupal.org/project/drupal/issues/3575467`)
-2. The summary panel appears automatically at the top of the issue content
-3. Wait a few seconds for Claude to analyze the issue
+2. A summary panel appears at the top of the issue content
+3. Click the **Analyze** button to summarize the issue
 4. On subsequent visits, the cached summary loads instantly (shown with a "Cached" badge)
-5. Click **Re-analyze** to generate a fresh summary
+5. Click **Re-analyze** to generate a fresh summary when the issue has new activity
 
 ## How It Works
 

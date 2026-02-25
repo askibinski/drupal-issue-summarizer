@@ -38,33 +38,10 @@ A Chrome extension that uses Claude AI to summarize Drupal.org issue pages. Drup
 ## How It Works
 
 ```mermaid
-sequenceDiagram
-    participant CS as Content Script
-    participant BG as Background Worker
-    participant Cache as Local Cache
-    participant DO as Drupal.org API
-    participant AI as Claude API
-
-    CS->>BG: SUMMARIZE_ISSUE {nodeId}
-    BG->>Cache: Check for cached summary
-    alt Cache hit
-        Cache-->>BG: Cached summary
-        BG-->>CS: Summary (fromCache: true)
-    else Cache miss
-        par Fetch in parallel
-            BG->>DO: GET /node/{id}.json
-            DO-->>BG: Issue metadata + body
-        and
-            BG->>DO: GET /comment.json?node={id}
-            DO-->>BG: All comments (paginated)
-        end
-        BG->>BG: Build prompt (strip HTML, truncate)
-        BG->>AI: POST /v1/messages
-        AI-->>BG: Structured summary
-        BG->>Cache: Store summary
-        BG-->>CS: Summary (fromCache: false)
-    end
-    CS->>CS: Render panel in page DOM
+graph LR
+    A["Content Script<br/><small>Renders panel in page DOM</small>"] <-->|summary| B["Background Worker<br/><small>Cache · Build prompt · Orchestrate</small>"]
+    B <-->|issue + comments| C["Drupal.org API<br/><small>Public REST endpoints</small>"]
+    B <-->|prompt → summary| D["Claude API<br/><small>AI summarization</small>"]
 ```
 
 ### Data Sources

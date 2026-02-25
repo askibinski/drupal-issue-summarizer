@@ -26,14 +26,20 @@
         <path d="M5 7h10M5 10h10M5 13h7" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
       <span class="dis-title">AI Summary</span>
-      <span class="dis-badge dis-badge-loading" id="dis-badge" aria-live="polite">Loading...</span>
-      <button class="dis-btn" id="dis-reanalyze" title="Re-analyze issue" aria-label="Re-analyze issue">
+      <span class="dis-badge" id="dis-badge" aria-live="polite"></span>
+      <button class="dis-btn dis-btn-analyze" id="dis-analyze" title="Analyze issue with Claude" aria-label="Analyze issue">
+        <span aria-hidden="true">&#x2728;</span> Analyze
+      </button>
+      <button class="dis-btn" id="dis-reanalyze" title="Re-analyze issue" aria-label="Re-analyze issue" style="display:none;">
         <span aria-hidden="true">&#x21bb;</span> Re-analyze
       </button>
       <span class="dis-collapse-icon" id="dis-collapse-icon" aria-hidden="true">&#x25BC;</span>
     </div>
     <div class="dis-body" id="dis-body">
-      <div class="dis-loading" id="dis-loading" role="status" aria-label="Loading summary">
+      <div class="dis-idle" id="dis-idle">
+        Click <strong>Analyze</strong> to summarize this issue with Claude AI.
+      </div>
+      <div class="dis-loading" id="dis-loading" role="status" aria-label="Loading summary" style="display:none;">
         <div class="dis-spinner"></div>
         <span>Analyzing issue with Claude...</span>
       </div>
@@ -56,11 +62,13 @@
   // Cache element references (these are static, injected once)
   const els = {
     header: document.getElementById("dis-header"),
+    idle: document.getElementById("dis-idle"),
     loading: document.getElementById("dis-loading"),
     content: document.getElementById("dis-content"),
     error: document.getElementById("dis-error"),
     footer: document.getElementById("dis-footer"),
     badge: document.getElementById("dis-badge"),
+    analyze: document.getElementById("dis-analyze"),
     reanalyze: document.getElementById("dis-reanalyze"),
   };
 
@@ -83,7 +91,13 @@
     }
   });
 
-  // Re-analyze button
+  // Analyze button (first-time trigger)
+  els.analyze.addEventListener("click", (e) => {
+    e.stopPropagation();
+    requestSummary(nodeId, false);
+  });
+
+  // Re-analyze button (refresh existing summary)
   els.reanalyze.addEventListener("click", (e) => {
     e.stopPropagation();
     requestSummary(nodeId, true);
@@ -91,9 +105,6 @@
 
   // Request counter to discard stale responses from concurrent requests
   let requestId = 0;
-
-  // Initial request
-  requestSummary(nodeId, false);
 
   function requestSummary(nodeId, forceRefresh) {
     const thisRequest = ++requestId;
@@ -120,22 +131,28 @@
   }
 
   function showLoading() {
+    els.idle.style.display = "none";
     els.loading.style.display = "flex";
     els.content.style.display = "none";
     els.error.style.display = "none";
     els.footer.style.display = "none";
+    els.analyze.disabled = true;
     els.reanalyze.disabled = true;
     els.badge.textContent = "Loading...";
     els.badge.className = "dis-badge dis-badge-loading";
   }
 
   function showSummary(markdown, fromCache) {
+    els.idle.style.display = "none";
     els.loading.style.display = "none";
     els.error.style.display = "none";
-    els.reanalyze.disabled = false;
     els.content.innerHTML = renderMarkdown(markdown);
     els.content.style.display = "block";
     els.footer.style.display = "block";
+    // After first summary, swap Analyze for Re-analyze
+    els.analyze.style.display = "none";
+    els.reanalyze.style.display = "flex";
+    els.reanalyze.disabled = false;
     if (fromCache) {
       els.badge.textContent = "Cached";
       els.badge.className = "dis-badge dis-badge-cached";
@@ -146,12 +163,14 @@
   }
 
   function showError(message) {
+    els.idle.style.display = "none";
     els.loading.style.display = "none";
     els.content.style.display = "none";
-    els.reanalyze.disabled = false;
     els.error.textContent = message;
     els.error.style.display = "block";
     els.footer.style.display = "none";
+    els.analyze.disabled = false;
+    els.reanalyze.disabled = false;
     els.badge.textContent = "Error";
     els.badge.className = "dis-badge dis-badge-error";
   }

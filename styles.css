@@ -108,6 +108,17 @@
   cursor: default;
 }
 
+.dis-btn-analyze {
+  background: #0076b6;
+  color: #fff;
+  border-color: #0076b6;
+}
+
+.dis-btn-analyze:hover:not(:disabled) {
+  background: #005a8c;
+  border-color: #005a8c;
+}
+
 .dis-collapse-icon {
   transition: transform 0.2s ease;
   font-size: 10px;
@@ -129,6 +140,13 @@
 .dis-collapsed .dis-header {
   border-bottom: none;
   border-radius: 4px;
+}
+
+/* Idle state (before first analysis) */
+.dis-idle {
+  color: #555;
+  padding: 8px 0;
+  font-size: 13px;
 }
 
 /* Loading spinner */

@@ -37,17 +37,34 @@ A Chrome extension that uses Claude AI to summarize Drupal.org issue pages. Drup
 
 ## How It Works
 
-```
-┌─────────────┐     ┌──────────────────┐     ┌──────────────┐     ┌───────────┐
-│ Content      │────>│ Background       │────>│ Drupal.org   │     │ Claude    │
-│ Script       │     │ Service Worker   │     │ REST API     │     │ API       │
-│              │<────│                  │<────│              │     │           │
-│ Renders      │     │ Cache check      │     │ Issue + all  │     │ Summarize │
-│ panel in     │     │ Fetch issue data │────>│ comments     │────>│ with      │
-│ page DOM     │     │ Build prompt     │     │              │     │ structured│
-│              │     │ Call Claude      │<────│              │<────│ output    │
-│              │     │ Cache result     │     │              │     │           │
-└─────────────┘     └──────────────────┘     └──────────────┘     └───────────┘
+```mermaid
+sequenceDiagram
+    participant CS as Content Script
+    participant BG as Background Worker
+    participant Cache as Local Cache
+    participant DO as Drupal.org API
+    participant AI as Claude API
+
+    CS->>BG: SUMMARIZE_ISSUE {nodeId}
+    BG->>Cache: Check for cached summary
+    alt Cache hit
+        Cache-->>BG: Cached summary
+        BG-->>CS: Summary (fromCache: true)
+    else Cache miss
+        par Fetch in parallel
+            BG->>DO: GET /node/{id}.json
+            DO-->>BG: Issue metadata + body
+        and
+            BG->>DO: GET /comment.json?node={id}
+            DO-->>BG: All comments (paginated)
+        end
+        BG->>BG: Build prompt (strip HTML, truncate)
+        BG->>AI: POST /v1/messages
+        AI-->>BG: Structured summary
+        BG->>Cache: Store summary
+        BG-->>CS: Summary (fromCache: false)
+    end
+    CS->>CS: Render panel in page DOM
 ```
 
 ### Data Sources
